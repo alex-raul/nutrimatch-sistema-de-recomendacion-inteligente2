@@ -49,7 +49,9 @@
 - ✅ Configuración de perfil nutricional personalizado
 - ✅ Gestión de preferencias y restricciones dietéticas
   📸 **![Datos del Usuario Resgistrado](capturas/datos.png)**
-
+### Sistema de Usuarios
+- ✅ Panel Principal del usuario
+- 📸 **![Dashboard](capturas/dashboard.png)**
 ### Motor de Recomendaciones
 - ✅ Algoritmo híbrido de recomendación  
 - ✅ Recomendaciones contextuales por horario de comida  
