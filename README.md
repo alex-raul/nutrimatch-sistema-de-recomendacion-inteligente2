@@ -9,34 +9,15 @@
 ## ✨ Características Principales
 
 ### 🧠 Sistema de Recomendación Inteligente
-- Algoritmo híbrido que combina filtrado colaborativo y basado en contenido  
-- Recomendaciones contextuales por tipo de comida (desayuno, almuerzo, cena, snack)  
-- Aprendizaje automático basado en patrones de consumo y calificaciones del usuario  
-- Score multifactorial considerando nutrición, preferencias, variedad y conveniencia  
 
 ### 📊 Seguimiento Nutricional Completo
-- Dashboard interactivo con visualización en tiempo real de macronutrientes  
-- Cálculo automático de necesidades nutricionales basado en objetivos personales  
-- Análisis de adherencia diaria y tendencias históricas  
-- Alertas inteligentes para mantener balance nutricional  
 
 ### 🔍 Base de Datos Nutricional Extensa
-- Más de 8,000 alimentos con información nutricional detallada  
-- Datos basados en USDA FoodData Central  
-- Integración con API externa para expandir catálogo en tiempo real  
-- Búsqueda avanzada con filtros por macronutrientes, restricciones dietéticas y categorías  
 
 ### 👤 Personalización Avanzada
-- Perfiles personalizados basados en edad, peso, altura, género y nivel de actividad  
-- Soporte para objetivos específicos (perder peso, ganar músculo, mantener salud)  
-- Gestión de restricciones dietéticas (vegetariano, vegano, sin gluten, keto, etc.)  
-- Sistema de alergias y preferencias alimentarias  
 
 ### 📈 Análisis y Progreso
-- Gráficos interactivos de tendencias nutricionales  
-- Análisis de patrones de consumo y alimentos más frecuentes  
-- Insights automatizados y recomendaciones de mejora  
-- Historial completo de consumo con métricas de adherencia  
+
 
 ---
 
@@ -114,18 +95,22 @@
 ### 1. Clona el repositorio
 ```bash
 git clone https://github.com/alex-raul/nutrimatch-sistema-de-recomendacion-inteligente2.git
+```bash
 cd nutrimatch-sistema-de-recomendacion-inteligente2
-
+```
 ### 2. Crear entorno virtual
 # Windows
+```bash
 python -m venv venv
 venv\Scripts\activate
-
+```
 # 3. Instalar dependencias
+```bash
 pip install -r requirements.txt
-
+```
 ##  Configura las variables de entorno
 Crea un archivo .env en la raíz del proyecto y agrega lo siguiente:
+```bash
 # .env
 SECRET_KEY='django-insecure-06a97tg1dx-$6mucbrzm=u#fy@j_-covk&pj^6fsxy*yf_oes3'
 DEBUG=True
@@ -139,11 +124,16 @@ DB_PORT=3306
 
 # API Keys
 # USDA_API_KEY=your-api-key-here
+```
 
 
 ## 5. Aplica migraciones de la base de datos
+```bash
 python manage.py makemigrations
 python manage.py migrate
+```
 
 ## 6. Ejecuta el servidor de desarrollo
+```bash
 python manage.py runserver
+```
