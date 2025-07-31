@@ -1,0 +1,690 @@
+<!-- templates/core/dashboard.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - NutriMatch{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-tachometer-alt text-primary"></i> 
+                        ¡Hola, {{ user.first_name|default:user.username }}!
+                    </h1>
+                    <p class="text-muted mb-0">
+                        {% now "l, j F Y" %} • Objetivo: {{ user.get_goal_display }}
+                    </p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="getRecommendations()">
+                        <i class="fas fa-magic"></i> Obtener Recomendaciones
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Nutrition Overview Cards -->
+    <div class="row mb-4">
+        <!-- Card de Calorías -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body dashboard-stat">
+                    <i class="fas fa-fire fa-2x mb-2"></i>
+                    <h3>{{ today_nutrition.calories|floatformat:0 }}</h3>
+                    <p>de {{ nutrition_targets.calories }} calorías</p>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-light" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card de Proteína -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body dashboard-stat">
+                    <i class="fas fa-dumbbell fa-2x mb-2"></i>
+                    <h3>{{ today_nutrition.protein|floatformat:1 }}g</h3>
+                    <p class="text-dark">de {{ nutrition_targets.protein }}g proteína</p>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-light" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card de Carbohidratos -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body dashboard-stat">
+                    <i class="fas fa-bread-slice fa-2x mb-2"></i>
+                    <h3>{{ today_nutrition.carbs|floatformat:1 }}g</h3>
+                    <p>de {{ nutrition_targets.carbs }}g carbohidratos</p>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-light" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card de Grasas -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body dashboard-stat">
+                    <i class="fas fa-tint fa-2x mb-2"></i>
+                    <h3>{{ today_nutrition.fat|floatformat:1 }}g</h3>
+                    <p>de {{ nutrition_targets.fat }}g grasas</p>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-light" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Recommendations Section -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-magic text-primary"></i> Recomendaciones para ti
+                    </h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="getRecommendations('breakfast')">
+                            Desayuno
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="getRecommendations('lunch')">
+                            Almuerzo
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="getRecommendations('dinner')">
+                            Cena
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="getRecommendations('snack')">
+                            Snack
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="recommendations-container">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-lightbulb fa-3x mb-3"></i>
+                            <p>Haz clic en "Obtener Recomendaciones" para ver sugerencias personalizadas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt text-warning"></i> Acciones Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="showFoodSearch()">
+                            <i class="fas fa-search"></i> Buscar Alimento
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="logQuickMeal()">
+                            <i class="fas fa-plus"></i> Registrar Comida
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="viewProgress()">
+                            <i class="fas fa-chart-line"></i> Ver Progreso
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Today's Progress -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calendar-day text-info"></i> Progreso de Hoy
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if today_nutrition.adherence_score %}
+                        <div class="text-center mb-3">
+                            <div class="position-relative d-inline-block">
+                                <!-- Círculo usando CSS puro -->
+                                <div class="progress-circle" data-percentage="{{ today_nutrition.adherence_score|default:0 }}">
+                                    <div class="progress-circle-inner">
+                                        <strong style="font-size: 1.2rem;">{{ today_nutrition.adherence_score|default:0 }}%</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center text-muted small">
+                            {% if today_nutrition.adherence_score >= 80 %}
+                                <i class="fas fa-thumbs-up text-success"></i> ¡Excelente progreso!
+                            {% elif today_nutrition.adherence_score >= 60 %}
+                                <i class="fas fa-smile text-warning"></i> Buen trabajo
+                            {% else %}
+                                <i class="fas fa-chart-line text-info"></i> Sigue así
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="fas fa-utensils fa-2x mb-3"></i>
+                            <p>Registra tu primera comida para ver tu progreso</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            
+            <!-- Recent Foods -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history text-secondary"></i> Comidas Recientes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="recent-foods">
+                        {% if recent_foods %}
+                            {% for consumption in recent_foods %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                    <div>
+                                        <small class="fw-bold">{{ consumption.food.name_es|default:consumption.food.name }}</small>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ consumption.quantity }}g • {{ consumption.get_meal_type_display }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-primary fw-bold">{{ consumption.calories_consumed|floatformat:0 }} cal</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small text-center">No hay comidas registradas hoy</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para buscar alimentos -->
+<div class="modal fade" id="foodSearchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-search"></i> Buscar Alimento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="food-search-input" 
+                           placeholder="Buscar alimento... (ej: pollo, arroz, manzana)">
+                </div>
+                <div id="food-search-results"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para registrar consumo -->
+<div class="modal fade" id="logFoodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Registrar Consumo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="log-food-form">
+                    <input type="hidden" id="selected-food-id">
+                    <div class="mb-3">
+                        <label class="form-label">Alimento seleccionado:</label>
+                        <p id="selected-food-name" class="fw-bold"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="food-quantity" class="form-label">Cantidad (gramos)</label>
+                        <input type="number" class="form-control" id="food-quantity" min="1" value="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="meal-type" class="form-label">Tipo de comida</label>
+                        <select class="form-select" id="meal-type">
+                            <option value="breakfast">Desayuno</option>
+                            <option value="lunch">Almuerzo</option>
+                            <option value="dinner">Cena</option>
+                            <option value="snack">Snack</option>
+                        </select>
+                    </div>
+                    <div id="nutrition-preview" class="mb-3"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLogFood()">
+                    <i class="fas fa-save"></i> Registrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.progress-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #28a745 0deg,
+        #28a745 calc(var(--percentage, 0) * 3.6deg),
+        #e9ecef calc(var(--percentage, 0) * 3.6deg),
+        #e9ecef 360deg
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.progress-circle-inner {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales
+let currentRecommendations = [];
+let selectedFood = null;
+
+// Obtener recomendaciones
+async function getRecommendations(mealType = null) {
+    const container = document.getElementById('recommendations-container');
+    container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Generando recomendaciones...</div>';
+    
+    try {
+        // Usar endpoint simplificado temporalmente
+        const response = await fetch('/api/recommendations/get-simple-recommendations/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                session_type: 'meal_suggestion',
+                meal_type: mealType,
+                count: 5
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            displayRecommendations(data.session.recommendations, mealType);
+        } else {
+            container.innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>Debug Info:</strong><br>
+                    Error: ${data.error || 'Error obteniendo recomendaciones'}<br>
+                    ${data.debug_info ? `Total alimentos: ${data.debug_info.total_foods}<br>` : ''}
+                    ${data.debug_info ? `Perfil completo: ${data.debug_info.user_completed}` : ''}
+                </div>
+            `;
+        }
+    } catch (error) {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                Error de conexión: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Mostrar recomendaciones
+function displayRecommendations(recommendations, mealType) {
+    const container = document.getElementById('recommendations-container');
+    
+    if (!recommendations || recommendations.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted">No se encontraron recomendaciones</div>';
+        return;
+    }
+    
+    let html = '';
+    if (mealType) {
+        html += `<h6 class="mb-3"><i class="fas fa-utensils"></i> Recomendaciones para ${mealType}</h6>`;
+    }
+    
+    recommendations.forEach(rec => {
+        const food = rec.food;
+        const nutrition = rec.nutrition_for_quantity;
+        
+        html += `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">${food.display_name}</h6>
+                            <span class="badge bg-secondary mb-2">${food.category_name || 'Sin categoría'}</span>
+                            <p class="card-text small text-muted mb-2">${rec.reason}</p>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <small class="text-muted">Calorías</small>
+                                    <div class="fw-bold">${nutrition.calories}</div>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted">Proteína</small>
+                                    <div class="fw-bold">${nutrition.protein}g</div>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted">Carbos</small>
+                                    <div class="fw-bold">${nutrition.carbs}g</div>
+                                </div>
+                                <div class="col-3">
+                                    <small class="text-muted">Grasas</small>
+                                    <div class="fw-bold">${nutrition.fat}g</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end ms-3">
+                            <div class="mb-2">
+                                <span class="badge bg-success">Score: ${rec.total_score}</span>
+                            </div>
+                            <div class="btn-group-vertical btn-group-sm">
+                                <button class="btn btn-primary btn-sm" onclick="selectFoodForLogging(${food.id}, '${food.display_name}', ${rec.suggested_quantity})">
+                                    <i class="fas fa-plus"></i> Agregar
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="viewFoodDetails(${food.id})">
+                                    <i class="fas fa-info"></i> Detalles
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Mostrar modal de búsqueda
+function showFoodSearch() {
+    const modal = new bootstrap.Modal(document.getElementById('foodSearchModal'));
+    modal.show();
+    
+    const searchInput = document.getElementById('food-search-input');
+    searchInput.focus();
+    
+    // Configurar búsqueda en tiempo real
+    let searchTimeout;
+    searchInput.oninput = function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (this.value.length >= 2) {
+                searchFoods(this.value);
+            }
+        }, 300);
+    };
+}
+
+// Buscar alimentos
+async function searchFoods(query) {
+    const resultsContainer = document.getElementById('food-search-results');
+    resultsContainer.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+    
+    try {
+        const response = await fetch(`/api/nutrition/search/?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data.results && data.results.length > 0) {
+            let html = '<div class="list-group">';
+            data.results.forEach(food => {
+                html += `
+                    <a href="#" class="list-group-item list-group-item-action" 
+                       onclick="selectFoodForLogging(${food.id}, '${food.display_name}', 100)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${food.display_name}</h6>
+                                <small class="text-muted">${food.category_name || 'Sin categoría'}</small>
+                            </div>
+                            <div class="text-end">
+                                <small>${food.calories} cal | ${food.protein}g prot</small>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+            html += '</div>';
+            resultsContainer.innerHTML = html;
+        } else {
+            resultsContainer.innerHTML = '<div class="text-muted text-center">No se encontraron alimentos</div>';
+        }
+    } catch (error) {
+        resultsContainer.innerHTML = '<div class="text-danger text-center">Error en la búsqueda</div>';
+    }
+}
+
+// Seleccionar alimento para registro
+function selectFoodForLogging(foodId, foodName, suggestedQuantity = 100) {
+    selectedFood = { id: foodId, name: foodName };
+    
+    document.getElementById('selected-food-id').value = foodId;
+    document.getElementById('selected-food-name').textContent = foodName;
+    document.getElementById('food-quantity').value = suggestedQuantity;
+    
+    // Cerrar modal de búsqueda si está abierto
+    const searchModal = bootstrap.Modal.getInstance(document.getElementById('foodSearchModal'));
+    if (searchModal) searchModal.hide();
+    
+    // Mostrar modal de registro
+    const logModal = new bootstrap.Modal(document.getElementById('logFoodModal'));
+    logModal.show();
+    
+    // Actualizar preview nutricional
+    updateNutritionPreview(foodId, suggestedQuantity);
+}
+
+// Actualizar preview nutricional
+async function updateNutritionPreview(foodId, quantity) {
+    const previewContainer = document.getElementById('nutrition-preview');
+    
+    try {
+        const response = await fetch(`/api/nutrition/analysis/?food_ids=${foodId}&quantities=${quantity}`);
+        const data = await response.json();
+        
+        if (data.total_nutrition) {
+            const nutrition = data.total_nutrition;
+            previewContainer.innerHTML = `
+                <div class="card bg-light">
+                    <div class="card-body p-3">
+                        <h6 class="card-title mb-2">Información Nutricional (${quantity}g)</h6>
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <div class="fw-bold text-primary">${nutrition.calories}</div>
+                                <small class="text-muted">kcal</small>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-bold text-success">${nutrition.protein}g</div>
+                                <small class="text-muted">proteína</small>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-bold text-info">${nutrition.carbohydrate}g</div>
+                                <small class="text-muted">carbos</small>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-bold text-warning">${nutrition.fat}g</div>
+                                <small class="text-muted">grasas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        previewContainer.innerHTML = '<div class="text-danger small">Error calculando nutrición</div>';
+    }
+}
+
+// Confirmar registro de alimento
+async function confirmLogFood() {
+    const foodId = document.getElementById('selected-food-id').value;
+    const quantity = document.getElementById('food-quantity').value;
+    const mealType = document.getElementById('meal-type').value;
+    
+    if (!foodId || !quantity) {
+        alert('Faltan datos para registrar el alimento');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/recommendations/log-consumption/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                food_id: foodId,
+                quantity: parseFloat(quantity),
+                meal_type: mealType
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('logFoodModal'));
+            modal.hide();
+            
+            // Mostrar mensaje de éxito
+            showAlert('success', '¡Alimento registrado exitosamente!');
+            
+            // Actualizar dashboard
+            location.reload();
+        } else {
+            showAlert('danger', data.error || 'Error registrando alimento');
+        }
+    } catch (error) {
+        showAlert('danger', 'Error de conexión');
+    }
+}
+
+// Funciones auxiliares
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.insertBefore(alertDiv, document.body.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+function logQuickMeal() {
+    showFoodSearch(); // Reutilizar la función de búsqueda
+}
+// Actualizar preview cuando cambie la cantidad
+document.addEventListener('DOMContentLoaded', function() {
+    const circles = document.querySelectorAll('.progress-circle');
+    circles.forEach(circle => {
+        const percentage = circle.getAttribute('data-percentage') || 0;
+        circle.style.setProperty('--percentage', percentage);
+    });
+
+    setTimeout(function() {
+        updateProgressBarsFromDjango();
+    }, 100);
+    
+    
+});
+// Función para ver progreso (placeholder por ahora)
+function viewProgress() {
+    window.location.href = '/progress/';
+}
+// vbarras de progreso
+// Función para actualizar barras usando datos de Django
+function updateProgressBarsFromDjango() {
+    try {
+        // Obtener los valores calculados en Django (pasados al template)
+        const percentages = {
+            calories: parseFloat('{{ percentages.calories|default:0 }}') || 0,
+            protein: parseFloat('{{ percentages.protein|default:0 }}') || 0,
+            carbs: parseFloat('{{ percentages.carbs|default:0 }}') || 0,
+            fat: parseFloat('{{ percentages.fat|default:0 }}') || 0
+        };
+        
+        console.log('Porcentajes desde Django:', percentages);
+        
+        // Actualizar barras de progreso
+        const progressBars = document.querySelectorAll('.progress-bar.bg-light');
+        console.log('Barras encontradas:', progressBars.length);
+        
+        if (progressBars.length >= 4) {
+            progressBars[0].style.width = percentages.calories + '%';
+            progressBars[1].style.width = percentages.protein + '%';
+            progressBars[2].style.width = percentages.carbs + '%';
+            progressBars[3].style.width = percentages.fat + '%';
+            
+            console.log('Barras actualizadas con:', percentages);
+        } else {
+            console.error('No se encontraron suficientes barras de progreso');
+        }
+        
+    } catch (error) {
+        console.error('Error actualizando barras de progreso:', error);
+    }
+}
+
+// Función de prueba manual
+function testProgressBars() {
+    const progressBars = document.querySelectorAll('.progress-bar.bg-light');
+    if (progressBars.length >= 4) {
+        progressBars[0].style.width = '75%'; // Calorías
+        progressBars[1].style.width = '60%'; // Proteína
+        progressBars[2].style.width = '45%'; // Carbohidratos  
+        progressBars[3].style.width = '30%'; // Grasas
+        console.log('Barras de prueba aplicadas');
+    }
+}
+
+</script>
+{% endblock %}

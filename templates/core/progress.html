@@ -1,0 +1,314 @@
+<!-- templates/core/progress.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}Mi Progreso - NutriMatch{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-chart-line text-primary"></i> Mi Progreso Nutricional
+                    </h1>
+                    <p class="text-muted mb-0">{{ date_range }} • {{ statistics.total_days }} días registrados</p>
+                </div>
+                <div>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-fire fa-2x mb-2"></i>
+                    <h4>{{ statistics.avg_calories }}</h4>
+                    <p class="mb-0">Calorías promedio</p>
+                    <small>Objetivo: {{ statistics.targets.calories }}</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-dumbbell fa-2x mb-2"></i>
+                    <h4>{{ statistics.avg_protein }}g</h4>
+                    <p class="mb-0">Proteína promedio</p>
+                    <small>Objetivo: {{ statistics.targets.protein }}g</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-2"></i>
+                    <h4>{{ statistics.avg_adherence }}%</h4>
+                    <p class="mb-0">Adherencia promedio</p>
+                    <small>
+                        {% if statistics.avg_adherence >= 80 %}
+                            ¡Excelente!
+                        {% elif statistics.avg_adherence >= 60 %}
+                            Muy bien
+                        {% else %}
+                            Mejorando
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                    <h4>{{ statistics.total_days }}</h4>
+                    <p class="mb-0">Días registrados</p>
+                    {% if statistics.best_day %}
+                        <small>Mejor día: {{ statistics.best_day.date|date:"d/m" }}</small>
+                    {% else %}
+                        <small>Sigue registrando</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Nutrition Trends -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area text-primary"></i> Tendencias Nutricionales
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="nutritionChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Adherence Chart -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bullseye text-success"></i> Adherencia Diaria
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="adherenceChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Popular Foods -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star text-warning"></i> Alimentos Más Consumidos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if popular_foods %}
+                        <div class="list-group list-group-flush">
+                            {% for food in popular_foods %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ food.food__name_es|default:food.food__name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ food.total_calories|floatformat:0 }} calorías totales</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">{{ food.total_consumed }} veces</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Registra más comidas para ver estadísticas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Insights -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb text-info"></i> Insights y Recomendaciones
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if statistics.avg_adherence >= 80 %}
+                            <div class="alert alert-success">
+                                <strong>¡Excelente trabajo!</strong> Tu adherencia promedio es muy buena. Sigue así.
+                            </div>
+                        {% elif statistics.avg_adherence >= 60 %}
+                            <div class="alert alert-warning">
+                                <strong>Buen progreso.</strong> Intenta ser más consistente para mejorar resultados.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <strong>Oportunidad de mejora.</strong> Planifica tus comidas con anticipación.
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-2">
+                        {% if statistics.protein_low_warning %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                <strong>Proteína baja:</strong> Considera agregar más fuentes de proteína.
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-2">
+                        {% if statistics.total_days >= 7 %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-trophy"></i> 
+                                <strong>¡Constancia!</strong> Llevas {{ statistics.total_days }} días registrando.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Datos del gráfico desde Django
+    const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+    
+    // Solo crear gráficos si hay datos
+    if (chartData.dates && chartData.dates.length > 0) {
+        // Nutrition Trends Chart
+        const nutritionCtx = document.getElementById('nutritionChart');
+        if (nutritionCtx) {
+            new Chart(nutritionCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.dates,
+                    datasets: [
+                        {
+                            label: 'Calorías',
+                            data: chartData.calories,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Proteína (g)',
+                            data: chartData.protein,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Carbohidratos (g)',
+                            data: chartData.carbs,
+                            borderColor: '#17a2b8',
+                            backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Grasas (g)',
+                            data: chartData.fat,
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Adherence Chart
+        const adherenceCtx = document.getElementById('adherenceChart');
+        if (adherenceCtx && chartData.adherence) {
+            const lastSevenDays = Math.min(7, chartData.dates.length);
+            const recentDates = chartData.dates.slice(-lastSevenDays);
+            const recentAdherence = chartData.adherence.slice(-lastSevenDays);
+            
+            new Chart(adherenceCtx, {
+                type: 'bar',
+                data: {
+                    labels: recentDates,
+                    datasets: [{
+                        label: 'Adherencia (%)',
+                        data: recentAdherence,
+                        backgroundColor: recentAdherence.map(value => {
+                            if (value >= 80) return '#28a745';
+                            if (value >= 60) return '#ffc107';
+                            return '#dc3545';
+                        })
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        // Mostrar mensaje cuando no hay datos
+        const nutritionChart = document.getElementById('nutritionChart');
+        const adherenceChart = document.getElementById('adherenceChart');
+        
+        if (nutritionChart) {
+            nutritionChart.style.display = 'none';
+            nutritionChart.parentElement.innerHTML = '<p class="text-center text-muted">No hay datos disponibles para mostrar gráficos</p>';
+        }
+        
+        if (adherenceChart) {
+            adherenceChart.style.display = 'none';
+            adherenceChart.parentElement.innerHTML = '<p class="text-center text-muted">No hay datos de adherencia disponibles</p>';
+        }
+    }
+});
+</script>
+{% endblock %}

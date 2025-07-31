@@ -1,0 +1,148 @@
+<!-- templates/core/home.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}NutriMatch - Tu Consejero Nutricional Inteligente{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Tu Consejero Nutricional <span class="text-warning">Inteligente</span>
+                </h1>
+                <p class="lead mb-4">
+                    Descubre recomendaciones personalizadas de alimentos basadas en tus objetivos, 
+                    preferencias y necesidades nutricionales. ¡Powered by AI!
+                </p>
+                <div class="d-grid d-md-flex gap-3">
+                    <a href="{% url 'auth:register' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-rocket"></i> Comenzar Gratis
+                    </a>
+                    <a href="#features" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-info-circle"></i> Más Información
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-brain" style="font-size: 12rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold">¿Por qué elegir NutriMatch?</h2>
+                <p class="lead text-muted">Tecnología avanzada para tu bienestar nutricional</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <h5>Recomendaciones Personalizadas</h5>
+                    <p class="text-muted">
+                        Algoritmos inteligentes que aprenden de tus preferencias y objetivos 
+                        para sugerirte los mejores alimentos.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5>Seguimiento Nutricional</h5>
+                    <p class="text-muted">
+                        Monitorea tu progreso diario con análisis detallados de macros, 
+                        micros y cumplimiento de objetivos.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h5>Base de Datos Extensa</h5>
+                    <p class="text-muted">
+                        Más de 8,000 alimentos con información nutricional completa 
+                        basada en datos oficiales del USDA.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold">¿Cómo funciona?</h2>
+                <p class="lead text-muted">Simple, inteligente y efectivo</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">1</span>
+                </div>
+                <h5>Crea tu Perfil</h5>
+                <p class="text-muted">Información básica sobre tu edad, peso, altura y objetivos</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">2</span>
+                </div>
+                <h5>Recibe Recomendaciones</h5>
+                <p class="text-muted">Algoritmos AI analizan tu perfil y sugieren alimentos ideales</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">3</span>
+                </div>
+                <h5>Registra tu Consumo</h5>
+                <p class="text-muted">Lleva un registro de lo que comes y califica los alimentos</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">4</span>
+                </div>
+                <h5>Mejora Continua</h5>
+                <p class="text-muted">El sistema aprende y mejora sus recomendaciones para ti</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold mb-4">¿Listo para transformar tu alimentación?</h2>
+                <p class="lead mb-4">Únete a miles de usuarios que ya mejoraron su nutrición con NutriMatch</p>
+                <a href="{% url 'auth:register' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket"></i> Comenzar Ahora - Es Gratis
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
